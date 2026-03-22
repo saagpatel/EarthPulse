@@ -84,7 +84,7 @@
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
     "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
+    "@commitlint/config-conventional": "^20.5.0",
     "@commitlint/cz-commitlint": "^19.8.1",
     "@lhci/cli": "^0.15.1",
     "commitizen": "^4.3.1",
