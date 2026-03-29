@@ -1,174 +1,77 @@
 # EarthPulse
 
-**Desktop mission control for a very active planet.**
+[![TypeScript](https://img.shields.io/badge/TypeScript-%233178c6?style=flat-square&logo=typescript)](#) [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](#)
 
-EarthPulse turns your desktop into a living globe of earthquakes, satellites, volcanoes, space weather, storm systems, wildfire activity, and other signals that normally stay scattered across half a dozen dashboards. Open it, and the world starts moving.
+> Leave it open on a second screen and the world starts moving — earthquakes, satellites, aurora, wildfires, and asteroid flybys, all in one place.
 
-Built with **Tauri 2 + React 19 + Rust**, EarthPulse is designed to feel like a fast, information-dense companion screen: something you can leave open, glance at, and immediately understand what Earth and near-Earth space are doing right now.
+EarthPulse turns your desktop into a live globe of planetary activity. It aggregates 12 data streams — USGS earthquakes, ISS and satellite tracks, NOAA space weather, NASA wildfire/storm alerts, asteroid close approaches, and more — and presents them as a layered, explorable map you can scrub through time, filter by event type, or export to CSV and GeoJSON.
 
-## Why It Is Fun To Use
+## Features
 
-EarthPulse is not just a list of feeds. It is a live, layered, explorable view of the planet.
+- **12 Live Data Layers** — Earthquakes (circles + heatmap), ISS tracker, satellite orbital tracks, aurora Kp index, volcanoes, GDACS hazard alerts, NASA wildfires and storms, asteroid close approaches, solar flares and CMEs, tectonic boundaries, meteor showers
+- **24h Replay** — Scrub through the last 24 hours of seismic activity and watch events pulse across the globe in sequence
+- **Historical Explorer** — Query USGS historical windows to compare past activity patterns against the present
+- **Custom Watchlists** — Save locations you care about and receive proximity-based alerts when events occur nearby
+- **Stats Dashboard** — Magnitude distributions, frequency trends, and Kp history in compact inline charts
+- **Export** — CSV, GeoJSON, and screenshot export for any current map view
 
-- Watch earthquakes pulse across the globe in real time.
-- Follow the ISS and satellite tracks as they sweep across the map.
-- See aurora conditions, solar flares, CMEs, and asteroid close approaches alongside Earth events.
-- Jump into **24h Replay** to scrub through recent seismic activity.
-- Open **Historical Explorer** to query older quake windows and compare patterns across time.
-- Keep custom watchlists for places you care about and get proximity-based alerts.
-- Export CSV, GeoJSON, and screenshots when you want to save or share what you are seeing.
+## Data Sources
 
-The goal is simple: make global activity feel immediate, readable, and a little thrilling.
-
-## What You Can Watch
-
-| Layer                                    | Source                                | Refresh |
-| ---------------------------------------- | ------------------------------------- | ------- |
-| Earthquakes (circles + heatmap)          | USGS GeoJSON                          | 60s     |
-| ISS tracker + orbit trail                | Open Notify                           | 5s      |
-| Satellite tracks (ISS, Hubble, Tiangong) | CelesTrak TLE + SGP4                  | 5min    |
-| Day / night terminator                   | Solar calculation                     | 60s     |
-| Aurora / Kp index                        | NOAA SWPC                             | 15min   |
-| Volcanoes                                | Smithsonian GVP with curated fallback | 6h      |
-| GDACS hazard alerts                      | GDACS RSS                             | 15min   |
-| Wildfires and storms                     | NASA EONET v3                         | 30min   |
-| Asteroid close approaches                | NASA NEO API                          | 6h      |
-| Solar flares and CMEs                    | NASA DONKI                            | 3h      |
-| Tectonic plate boundaries                | Static GeoJSON                        | Startup |
-| Meteor shower calendar                   | Curated catalog                       | Startup |
-
-## Standout Features
-
-- **24h Replay**: Scrub through the last day of quake activity and watch the map come alive.
-
-- **Historical Explorer**: Query USGS historical windows to compare earlier activity against the present.
-
-- **Stats Dashboard**: See magnitude distributions, frequency trends, and Kp history in compact charts.
-
-- **Local Conditions**: Pull weather, air quality, and sea-surface temperature for your configured location.
-
-- **Sonification**: Turn parts of the live data into sound so the app can be monitored with your ears too.
-
-- **Ollama Summary**: Generate a local LLM summary of current conditions when you want a quick narrative read.
-
-- **Custom Watchlists**: Save geographic points of interest and get proximity-aware event notifications.
-
-- **Desktop-Native Behavior**: Use screenshots, clipboard copy, system tray behavior, and native notifications.
+| Layer | Source | Refresh |
+|-------|--------|---------|
+| Earthquakes | USGS GeoJSON | 60s |
+| ISS tracker | Open Notify | 5s |
+| Satellite tracks | CelesTrak TLE + SGP4 | 5min |
+| Aurora / Kp index | NOAA SWPC | 15min |
+| Volcanoes | Smithsonian GVP | 6h |
+| GDACS hazard alerts | GDACS RSS | 15min |
+| Wildfires + storms | NASA EONET v3 | 30min |
+| Asteroid close approaches | NASA NEO API | 6h |
+| Solar flares + CMEs | NASA DONKI | 3h |
 
 ## Quick Start
 
 ### Prerequisites
 
-- [Rust](https://rustup.rs/) (stable)
-- [Node.js](https://nodejs.org/) 20+
-- [pnpm](https://pnpm.io/)
+- Node.js 20+
+- pnpm 9+
+- Rust toolchain (stable) + Tauri v2 prerequisites for macOS
 
-Important local setup notes:
-
-- Your local workspace path must **not** contain `:`.
-- Run `pnpm preflight` after install so the repo can validate your environment.
-
-Optional but recommended:
-
-- Set `EARTHPULSE_NASA_API_KEY` or `NASA_API_KEY` to avoid `DEMO_KEY` limits for NASA NEO and DONKI feeds.
-
-### Run The Real Desktop App
+### Installation
 
 ```bash
+git clone https://github.com/saagpatel/EarthPulse.git
+cd EarthPulse
 pnpm install
-pnpm preflight
-pnpm tauri dev
+cp .env.example .env
 ```
 
-### Run The Browser Preview
+### Run (development)
 
 ```bash
 pnpm dev
 ```
 
-Browser preview is great for quick UI checks and smoke tests. It uses mocked desktop data, so use `pnpm tauri dev` for real desktop validation.
-
-### Build
+### Build (desktop app)
 
 ```bash
-pnpm preflight
-pnpm tauri build
-```
-
-## Core Commands
-
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test:unit
-pnpm test:e2e
-pnpm test:rust
-bash .codex/scripts/run_verify_commands.sh
-```
-
-## Development Modes
-
-### Standard desktop development
-
-```bash
-pnpm tauri dev
-```
-
-### Lean dev mode
-
-```bash
-pnpm dev:lean
-```
-
-Lean mode keeps heavy build output in temporary directories and cleans them up when the process exits. It is useful when disk pressure matters more than restart speed.
-
-## Release And Project Docs
-
-- [Release Runbook](docs/release/RELEASE_RUNBOOK.md)
-- [Release Secrets Setup](docs/release/RELEASE_SECRETS_SETUP.md)
-- [Release Notes](docs/releases/release-notes-v0.1.0.md)
-- [Environment Setup](docs/onboarding/environment-setup.md)
-- [Repo Tour](docs/onboarding/repo-tour.md)
-- [Common Tasks](docs/onboarding/common-tasks.md)
-- [System Overview](docs/architecture/system-overview.md)
-- [Final Closeout Report](docs/comms/closeout/final-closeout-report.md)
-
-## Project Structure
-
-```text
-src/
-  components/   React UI: map, sidebar, timeline, dialogs
-  stores/       Zustand state per data source
-  hooks/        Keyboard shortcuts, listeners, and app behaviors
-  runtime/      Real Tauri bridge or browser preview mocks
-  utils/        Export, notifications, sonification helpers
-
-src-tauri/src/
-  commands/     Tauri IPC handlers
-  fetchers/     External data clients
-  calculations/ Terminator and orbital calculations
-  models/       Shared backend data types
-  db.rs         SQLite cache and settings
-  notifications.rs
-  tray.rs
-  lib.rs        App setup and background polling loops
+pnpm build
 ```
 
 ## Tech Stack
 
-| Area          | Stack                                    |
-| ------------- | ---------------------------------------- |
-| Desktop shell | Tauri 2                                  |
-| Frontend      | React 19, TypeScript, Tailwind CSS 4     |
-| State         | Zustand 5                                |
-| Mapping       | Leaflet + react-leaflet 5                |
-| Backend       | Rust, reqwest, rusqlite, sgp4, quick-xml |
-| Charts        | uPlot                                    |
-| Audio         | Web Audio API                            |
+| Layer | Technology |
+|-------|------------|
+| Desktop shell | Tauri 2 + Rust |
+| Frontend | React 19 + TypeScript + Vite |
+| Map rendering | Leaflet / MapLibre |
+| Satellite math | SGP4 propagator (Rust) |
+| Storage | SQLite (watchlists, history) |
+| Styling | Tailwind CSS |
 
-## Current Release Posture
+## Architecture
 
-EarthPulse is currently documented and stabilized as an **internal unsigned beta**. The app is launchable and the verification path is in place, but signed public desktop distribution still depends on provisioning the real release credentials described in [docs/release/RELEASE_SECRETS_SETUP.md](docs/release/RELEASE_SECRETS_SETUP.md).
+EarthPulse is a Tauri 2 desktop app. The Rust backend manages all data fetching (polling each source on its configured interval), SGP4 satellite orbit propagation, SQLite persistence for watchlists and replay data, and the historical query engine. The React frontend renders the layered map, handles timeline scrubbing for the 24h replay, and drives the stats dashboard with data streamed from the Rust layer via Tauri commands.
 
 ## License
 
