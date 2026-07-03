@@ -14,6 +14,10 @@ if [[ "$branch" == "main" || "$branch" == "master" ]]; then
   exit 1
 fi
 
+if [[ "$branch" == dependabot/* ]]; then
+  exit 0
+fi
+
 if ! [[ "$branch" =~ $pattern ]]; then
   echo "Invalid branch: $branch"
   echo "Expected: codex/<type>/<slug>"
