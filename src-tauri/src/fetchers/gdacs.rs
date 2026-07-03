@@ -1,5 +1,6 @@
 use super::http::{send_with_resilience, SourceClass, HTTP_CLIENT};
 use crate::models::gdacs::GdacsAlert;
+use quick_xml::escape::unescape;
 use quick_xml::events::Event;
 use quick_xml::Reader;
 
@@ -67,7 +68,11 @@ fn parse_gdacs_rss(xml: &str) -> Result<Vec<GdacsAlert>, String> {
                     continue;
                 }
 
-                let text = e.unescape().unwrap_or_default().to_string();
+                let text = e
+                    .decode()
+                    .ok()
+                    .and_then(|text| unescape(&text).ok().map(|text| text.into_owned()))
+                    .unwrap_or_default();
                 let text = text.trim().to_string();
                 if text.is_empty() {
                     buf.clear();
