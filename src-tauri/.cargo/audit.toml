@@ -1,0 +1,8 @@
+[advisories]
+ignore = [
+  # plist 1.8.0 constrains quick-xml below the fixed 0.41.0 release through Tauri.
+  # Keep this scoped to the two quick-xml advisories and remove it once Tauri/plist
+  # can resolve quick-xml >= 0.41.0.
+  "RUSTSEC-2026-0194",
+  "RUSTSEC-2026-0195",
+]
