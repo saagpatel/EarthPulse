@@ -1,0 +1,1 @@
+@src/components/Settings/SettingsPanel.test.tsx
