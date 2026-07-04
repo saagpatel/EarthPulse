@@ -1,43 +1,44 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { useSettingsStore } from "../../stores/settingsStore";
+import {
+  useSettingsStore,
+  type SettingsState,
+} from "../../stores/settingsStore";
 
 export function SettingsPanel() {
   const store = useSettingsStore();
 
+  if (!store.isOpen) return null;
+
+  return <SettingsPanelContent store={store} />;
+}
+
+function SettingsPanelContent({
+  store,
+}: {
+  store: SettingsState;
+}) {
   // Local state for all editable fields — snapshot store values when panel opens
-  const [lat, setLat] = useState("");
-  const [lon, setLon] = useState("");
-  const [magThreshold, setMagThreshold] = useState(5.0);
-  const [proximityRadius, setProximityRadius] = useState(500);
-  const [notifyEq, setNotifyEq] = useState(true);
-  const [notifyAurora, setNotifyAurora] = useState(true);
-  const [notifyVolc, setNotifyVolc] = useState(true);
-  const [sonificationEnabled, setSonificationEnabled] = useState(false);
-  const [ollamaModel, setOllamaModel] = useState("llama3.2");
+  const [lat, setLat] = useState(() => store.userLat.toString());
+  const [lon, setLon] = useState(() => store.userLon.toString());
+  const [magThreshold, setMagThreshold] = useState(
+    () => store.earthquakeMagThreshold,
+  );
+  const [proximityRadius, setProximityRadius] = useState(
+    () => store.proximityRadius,
+  );
+  const [notifyEq, setNotifyEq] = useState(() => store.notifyEarthquakes);
+  const [notifyAurora, setNotifyAurora] = useState(() => store.notifyAurora);
+  const [notifyVolc, setNotifyVolc] = useState(() => store.notifyVolcanoes);
+  const [sonificationEnabled, setSonificationEnabled] = useState(
+    () => store.sonificationEnabled,
+  );
+  const [ollamaModel, setOllamaModel] = useState(() => store.ollamaModel);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Sync local state from store whenever the panel opens
   useEffect(() => {
-    if (store.isOpen) {
-      setLat(store.userLat.toString());
-      setLon(store.userLon.toString());
-      setMagThreshold(store.earthquakeMagThreshold);
-      setProximityRadius(store.proximityRadius);
-      setNotifyEq(store.notifyEarthquakes);
-      setNotifyAurora(store.notifyAurora);
-      setNotifyVolc(store.notifyVolcanoes);
-      setSonificationEnabled(store.sonificationEnabled);
-      setOllamaModel(store.ollamaModel);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.isOpen]);
-
-  useEffect(() => {
-    if (!store.isOpen) return;
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !isSaving) {
         store.toggle();
@@ -47,8 +48,6 @@ export function SettingsPanel() {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isSaving, store]);
-
-  if (!store.isOpen) return null;
 
   const handleSave = async () => {
     setSaveError(null);
