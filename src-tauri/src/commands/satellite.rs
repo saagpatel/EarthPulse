@@ -116,7 +116,7 @@ pub async fn get_pass_predictions_inner(db: &Database) -> Result<Vec<PassPredict
         }
     }
 
-    all_passes.sort_by(|a, b| a.start_time.cmp(&b.start_time));
+    all_passes.sort_by_key(|pass| pass.start_time);
     Ok(all_passes)
 }
 
