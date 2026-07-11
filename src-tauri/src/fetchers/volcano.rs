@@ -1,5 +1,6 @@
 use super::http::{send_with_resilience, SourceClass, HTTP_CLIENT};
 use crate::models::volcano::Volcano;
+use quick_xml::escape::unescape;
 use quick_xml::events::Event;
 use quick_xml::Reader;
 use std::collections::BTreeMap;
@@ -200,7 +201,11 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                     continue;
                 }
 
-                let text = e.unescape().unwrap_or_default().to_string();
+                let text = e
+                    .decode()
+                    .ok()
+                    .and_then(|text| unescape(&text).ok().map(|text| text.into_owned()))
+                    .unwrap_or_default();
                 let trimmed = text.trim();
                 if trimmed.is_empty() {
                     buf.clear();
