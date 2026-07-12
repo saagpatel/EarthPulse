@@ -90,7 +90,7 @@
     "commitizen": "^4.3.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
-    "prettier": "^3.6.2",
+    "prettier": "^3.9.5",
     "jsdom": "^29.1.1",
     "vitest": "^3.2.6"
   },
