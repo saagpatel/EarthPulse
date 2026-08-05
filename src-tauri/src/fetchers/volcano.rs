@@ -169,7 +169,10 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
     let mut buf = Vec::new();
 
     let mut in_item = false;
-    let mut current_tag = String::new();
+    // One accumulator per element. quick-xml 0.38+ splits an element's character data
+    // across several events: Text, CData, and GeneralRef for each `&entity;`. Assigning
+    // per-event keeps only the last fragment, so accumulate here and commit on End.
+    let mut current_text = String::new();
 
     let mut title = String::new();
     let mut description = String::new();
@@ -184,7 +187,7 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
-                current_tag = name.clone();
+                current_text.clear();
                 if name == "item" {
                     in_item = true;
                     title.clear();
@@ -201,30 +204,9 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                     continue;
                 }
 
-                let text = e
-                    .decode()
-                    .ok()
-                    .and_then(|text| unescape(&text).ok().map(|text| text.into_owned()))
-                    .unwrap_or_default();
-                let trimmed = text.trim();
-                if trimmed.is_empty() {
-                    buf.clear();
-                    continue;
-                }
-
-                match current_tag.as_str() {
-                    "title" => title = trimmed.to_string(),
-                    "description" => description = trimmed.to_string(),
-                    "pubDate" => pub_date = trimmed.to_string(),
-                    "guid" => guid = trimmed.to_string(),
-                    "georss:point" => {
-                        let parts: Vec<&str> = trimmed.split_whitespace().collect();
-                        if parts.len() == 2 {
-                            lat = parts[0].parse::<f64>().ok();
-                            lon = parts[1].parse::<f64>().ok();
-                        }
-                    }
-                    _ => {}
+                // From 0.38 on, Text carries no escaped parts; entities arrive as GeneralRef.
+                if let Ok(text) = e.decode() {
+                    current_text.push_str(&text);
                 }
             }
             Ok(Event::CData(ref e)) => {
@@ -233,21 +215,57 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                     continue;
                 }
 
-                let text = String::from_utf8_lossy(e.as_ref()).to_string();
-                let trimmed = text.trim();
-                if trimmed.is_empty() {
+                current_text.push_str(&String::from_utf8_lossy(e.as_ref()));
+            }
+            Ok(Event::GeneralRef(ref e)) => {
+                if !in_item {
                     buf.clear();
                     continue;
                 }
 
-                match current_tag.as_str() {
-                    "description" => description = trimmed.to_string(),
-                    "title" => title = trimmed.to_string(),
-                    _ => {}
+                match e.resolve_char_ref() {
+                    // Numeric form: &#38; or &#x26;
+                    Ok(Some(ch)) => current_text.push(ch),
+                    // Named form. unescape knows the five XML predefined entities; an
+                    // unrecognised entity is kept as written rather than dropped, so a
+                    // parse failure can never silently shorten a field.
+                    _ => {
+                        let name = e.decode().map(|n| n.into_owned()).unwrap_or_default();
+                        let raw = format!("&{name};");
+                        match unescape(&raw) {
+                            Ok(resolved) => current_text.push_str(&resolved),
+                            Err(_) => current_text.push_str(&raw),
+                        }
+                    }
                 }
             }
             Ok(Event::End(ref e)) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+                // Commit the accumulated character data. The closing tag names the field
+                // unambiguously, so this replaces the old per-event assignment keyed on
+                // current_tag, which lost every fragment but the last.
+                if in_item {
+                    let trimmed = current_text.trim();
+                    if !trimmed.is_empty() {
+                        match name.as_str() {
+                            "title" => title = trimmed.to_string(),
+                            "description" => description = trimmed.to_string(),
+                            "pubDate" => pub_date = trimmed.to_string(),
+                            "guid" => guid = trimmed.to_string(),
+                            "georss:point" => {
+                                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                                if parts.len() == 2 {
+                                    lat = parts[0].parse::<f64>().ok();
+                                    lon = parts[1].parse::<f64>().ok();
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                current_text.clear();
+
                 if name == "item" && in_item {
                     in_item = false;
 
@@ -419,6 +437,36 @@ mod tests {
         assert_eq!(volcanoes[0].status, "warning");
         assert_eq!(volcanoes[0].id, "fuego-2026-02-25");
         assert_eq!(volcanoes[0].last_eruption, "2026-02-25");
+    }
+
+    // Same defect as gdacs.rs: quick-xml 0.38+ reports `&amp;` as a separate
+    // Event::GeneralRef, so a parser that assigns per Text event keeps only the
+    // fragment after the last entity. Without this the volcano name silently
+    // truncates to whatever follows the ampersand.
+    #[test]
+    fn preserves_entity_refs_in_item_fields() {
+        let xml = r#"
+        <rss version="2.0" xmlns:georss="http://www.georss.org/georss">
+          <channel>
+            <item>
+              <title>Villarrica &amp; Llaima - Report for 2026-02-25</title>
+              <description>Ash &amp; steam plume observed</description>
+              <pubDate>Wed, 25 Feb 2026 00:00:00 +0000</pubDate>
+              <guid>https://example.com/#villarrica-2026-02-25</guid>
+              <georss:point>-39.42 -71.93</georss:point>
+            </item>
+          </channel>
+        </rss>
+        "#;
+
+        let volcanoes = parse_weekly_report_rss(xml).expect("rss should parse");
+        assert_eq!(volcanoes.len(), 1);
+        assert_eq!(volcanoes[0].name, "Villarrica & Llaima");
+        assert!(
+            volcanoes[0].description.contains("Ash & steam"),
+            "description lost entity text: {:?}",
+            volcanoes[0].description
+        );
     }
 
     #[test]

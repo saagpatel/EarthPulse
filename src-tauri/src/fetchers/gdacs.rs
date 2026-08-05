@@ -27,7 +27,10 @@ fn parse_gdacs_rss(xml: &str) -> Result<Vec<GdacsAlert>, String> {
     let mut buf = Vec::new();
 
     let mut in_item = false;
-    let mut current_tag = String::new();
+    // One accumulator per element. quick-xml 0.38+ splits an element's character data
+    // across several events: Text, CData, and GeneralRef for each `&entity;`. Assigning
+    // per-event keeps only the last fragment, so accumulate here and commit on End.
+    let mut current_text = String::new();
 
     // Item fields
     let mut title = String::new();
@@ -45,7 +48,7 @@ fn parse_gdacs_rss(xml: &str) -> Result<Vec<GdacsAlert>, String> {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
-                current_tag = name.clone();
+                current_text.clear();
 
                 if name == "item" {
                     in_item = true;
@@ -68,37 +71,9 @@ fn parse_gdacs_rss(xml: &str) -> Result<Vec<GdacsAlert>, String> {
                     continue;
                 }
 
-                let text = e
-                    .decode()
-                    .ok()
-                    .and_then(|text| unescape(&text).ok().map(|text| text.into_owned()))
-                    .unwrap_or_default();
-                let text = text.trim().to_string();
-                if text.is_empty() {
-                    buf.clear();
-                    continue;
-                }
-
-                match current_tag.as_str() {
-                    "title" => title = text,
-                    "description" => description = text,
-                    "link" => link = text,
-                    "pubDate" => pub_date = text,
-                    "gdacs:alertlevel" => alert_level = text,
-                    "gdacs:eventtype" => event_type = text,
-                    "gdacs:country" => country = text,
-                    "gdacs:eventid" => event_id = text,
-                    "geo:lat" => lat = text.parse().ok(),
-                    "geo:long" => lon = text.parse().ok(),
-                    "georss:point" => {
-                        // Format: "lat lon"
-                        let parts: Vec<&str> = text.split_whitespace().collect();
-                        if parts.len() == 2 {
-                            lat = parts[0].parse().ok();
-                            lon = parts[1].parse().ok();
-                        }
-                    }
-                    _ => {}
+                // From 0.38 on, Text carries no escaped parts; entities arrive as GeneralRef.
+                if let Ok(text) = e.decode() {
+                    current_text.push_str(&text);
                 }
             }
             Ok(Event::CData(ref e)) => {
@@ -106,18 +81,63 @@ fn parse_gdacs_rss(xml: &str) -> Result<Vec<GdacsAlert>, String> {
                     buf.clear();
                     continue;
                 }
-                let text = String::from_utf8_lossy(e.as_ref()).to_string();
-                let text = text.trim().to_string();
-                if text.is_empty() {
+                current_text.push_str(&String::from_utf8_lossy(e.as_ref()));
+            }
+            Ok(Event::GeneralRef(ref e)) => {
+                if !in_item {
                     buf.clear();
                     continue;
                 }
-                if current_tag == "description" {
-                    description = text;
+                match e.resolve_char_ref() {
+                    // Numeric form: &#38; or &#x26;
+                    Ok(Some(ch)) => current_text.push(ch),
+                    // Named form. unescape knows the five XML predefined entities; an
+                    // unrecognised entity is kept as written rather than dropped, so a
+                    // parse failure can never silently shorten a field.
+                    _ => {
+                        let name = e.decode().map(|n| n.into_owned()).unwrap_or_default();
+                        let raw = format!("&{name};");
+                        match unescape(&raw) {
+                            Ok(resolved) => current_text.push_str(&resolved),
+                            Err(_) => current_text.push_str(&raw),
+                        }
+                    }
                 }
             }
             Ok(Event::End(ref e)) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+                // Commit the accumulated character data. The closing tag names the field
+                // unambiguously, so this replaces the old per-event assignment keyed on
+                // current_tag, which lost every fragment but the last.
+                if in_item {
+                    let text = current_text.trim();
+                    if !text.is_empty() {
+                        match name.as_str() {
+                            "title" => title = text.to_string(),
+                            "description" => description = text.to_string(),
+                            "link" => link = text.to_string(),
+                            "pubDate" => pub_date = text.to_string(),
+                            "gdacs:alertlevel" => alert_level = text.to_string(),
+                            "gdacs:eventtype" => event_type = text.to_string(),
+                            "gdacs:country" => country = text.to_string(),
+                            "gdacs:eventid" => event_id = text.to_string(),
+                            "geo:lat" => lat = text.parse().ok(),
+                            "geo:long" => lon = text.parse().ok(),
+                            "georss:point" => {
+                                // Format: "lat lon"
+                                let parts: Vec<&str> = text.split_whitespace().collect();
+                                if parts.len() == 2 {
+                                    lat = parts[0].parse().ok();
+                                    lon = parts[1].parse().ok();
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                current_text.clear();
+
                 if name == "item" && in_item {
                     in_item = false;
 
@@ -206,5 +226,48 @@ mod tests {
         assert_eq!(alerts[0].alert_type, "FL");
         assert_eq!(alerts[0].severity, "Orange");
         assert!(alerts[0].description.contains("Heavy flood warning"));
+    }
+
+    // quick-xml 0.38 stopped reporting escaped entities inside Event::Text and began
+    // emitting them as a separate Event::GeneralRef. A parser that ignores GeneralRef
+    // and assigns (rather than appends) each Text fragment silently keeps only the
+    // fragment after the last entity. Real GDACS links carry `&amp;`, so this is the
+    // shape the single pre-existing fixture could never exercise.
+    #[test]
+    fn preserves_entity_refs_in_item_fields() {
+        let xml = r#"
+        <rss version="2.0" xmlns:gdacs="http://www.gdacs.org" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+          <channel>
+            <item>
+              <title>Flood in Exampleland &amp; Neighbourland</title>
+              <description>Rivers A &amp; B crested &lt;fast&gt;</description>
+              <link>https://www.gdacs.org/report.aspx?eventid=123&amp;episodeid=4</link>
+              <pubDate>Mon, 01 Mar 2026 12:00:00 GMT</pubDate>
+              <gdacs:alertlevel>Orange</gdacs:alertlevel>
+              <gdacs:eventtype>FL</gdacs:eventtype>
+              <gdacs:country>Exampleland &amp; Neighbourland</gdacs:country>
+              <gdacs:eventid>123</gdacs:eventid>
+              <geo:lat>10.5</geo:lat>
+              <geo:long>20.5</geo:long>
+            </item>
+          </channel>
+        </rss>
+        "#;
+
+        let alerts = parse_gdacs_rss(xml).expect("xml should parse");
+        assert_eq!(alerts.len(), 1);
+        assert_eq!(alerts[0].title, "Flood in Exampleland & Neighbourland");
+        assert_eq!(
+            alerts[0].link,
+            "https://www.gdacs.org/report.aspx?eventid=123&episodeid=4"
+        );
+        assert_eq!(alerts[0].country, "Exampleland & Neighbourland");
+        // strip_html removes the <fast> pseudo-tag that `&lt;fast&gt;` unescapes into,
+        // so assert on the ampersand text that must survive either way.
+        assert!(
+            alerts[0].description.contains("Rivers A & B crested"),
+            "description lost entity text: {:?}",
+            alerts[0].description
+        );
     }
 }
