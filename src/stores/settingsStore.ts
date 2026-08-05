@@ -12,7 +12,7 @@ export interface PersistedSettings {
   ollama_model?: string;
 }
 
-interface SettingsState {
+export interface SettingsState {
   userLat: number;
   userLon: number;
   isOpen: boolean;
