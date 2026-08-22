@@ -20,7 +20,10 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
+      # Scope to production dependencies: the shipped Tauri app comprises prod
+      # deps + the Rust binary. Dev-tooling advisories (jsdom, @lhci/cli,
+      # @commitlint) do not reach users and are managed via their own bumps.
+      - run: pnpm audit --prod --audit-level=high
 
   rust-audit:
     runs-on: ubuntu-latest

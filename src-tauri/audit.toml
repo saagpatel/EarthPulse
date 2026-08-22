@@ -1,0 +1,10 @@
+# cargo-audit configuration.
+#
+# RUSTSEC-2024-0370: proc-macro-error 1.0.4 is unmaintained.
+# It is pulled in only transitively (via older proc-macro dependencies that
+# still rely on syn 1.x) and there is no patched release — the crate is
+# unmaintained, not vulnerable. No exploitable advisory is involved; this is an
+# informational "unmaintained" flag. Ignored with justification until the
+# upstream chain migrates off proc-macro-error; re-audit on each dependency bump.
+[advisories]
+ignore = ["RUSTSEC-2024-0370"]
