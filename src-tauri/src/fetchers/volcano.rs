@@ -186,7 +186,7 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) => {
-                let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+                let name = e.name().as_ref().to_string();
                 current_text.clear();
                 if name == "item" {
                     in_item = true;
@@ -205,9 +205,7 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                 }
 
                 // From 0.38 on, Text carries no escaped parts; entities arrive as GeneralRef.
-                if let Ok(text) = e.decode() {
-                    current_text.push_str(&text);
-                }
+                current_text.push_str(e.as_ref());
             }
             Ok(Event::CData(ref e)) => {
                 if !in_item {
@@ -215,7 +213,7 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                     continue;
                 }
 
-                current_text.push_str(&String::from_utf8_lossy(e.as_ref()));
+                current_text.push_str(e.as_ref());
             }
             Ok(Event::GeneralRef(ref e)) => {
                 if !in_item {
@@ -230,7 +228,7 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                     // unrecognised entity is kept as written rather than dropped, so a
                     // parse failure can never silently shorten a field.
                     _ => {
-                        let name = e.decode().map(|n| n.into_owned()).unwrap_or_default();
+                        let name = e.as_ref();
                         let raw = format!("&{name};");
                         match unescape(&raw) {
                             Ok(resolved) => current_text.push_str(&resolved),
@@ -240,7 +238,7 @@ fn parse_weekly_report_rss(xml: &str) -> Result<Vec<Volcano>, String> {
                 }
             }
             Ok(Event::End(ref e)) => {
-                let name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+                let name = e.name().as_ref().to_string();
 
                 // Commit the accumulated character data. The closing tag names the field
                 // unambiguously, so this replaces the old per-event assignment keyed on
