@@ -6,15 +6,16 @@ Use a local path that does **not** contain `:`. The repo preflight rejects colon
 
 Required tools:
 
-- Node.js 22.22.1+ within 22.x, or 24+
+- Node.js 22.23.2 (`.nvmrc` and CI pin); compatible alternatives are 22.22.2+ within 22.x, 24.15.0+ within 24.x, or 26+
 - pnpm 10.30.3 (`package.json` package-manager pin)
 - Rust 1.96.0 (`rust-toolchain.toml`, including rustfmt and Clippy)
 - Git
 
 The locked contributor tooling requires this Node range (`lint-staged` 17.5.1
-needs >=22.22.1; jsdom 29.1.1 excludes Node 23). Current CI and `.nvmrc` still select Node 20;
-that toolchain mismatch is unresolved and is not a supported full
-contributor setup. The preflight minimum is not a substitute for these engines.
+needs >=22.22.1; jsdom 30.1.1 requires ^22.22.2, ^24.15.0, or >=26.0.0).
+CI and `.nvmrc` select 22.23.2 so the test environment and contributor tooling
+use a published compatible runtime. The preflight minimum is not a substitute
+for dependency engines.
 
 ## Install sequence
 
