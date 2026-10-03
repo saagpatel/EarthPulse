@@ -33,7 +33,7 @@ EarthPulse turns your desktop into a live globe of planetary activity. It aggreg
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22.22.1+ within 22.x, or 24+
 - pnpm 10.30.3 (the `packageManager` pin)
 - Rust 1.96.0 (selected by `rust-toolchain.toml`) + Tauri v2 prerequisites for macOS
 
