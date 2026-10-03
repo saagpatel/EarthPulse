@@ -3,7 +3,7 @@
 ## 1) Clone and Install
 
 ```bash
-pnpm install
+corepack pnpm install --frozen-lockfile
 ```
 
 ## 2) Validate Environment
@@ -17,14 +17,16 @@ If preflight fails because the path contains `:`, move or symlink the repository
 ## 3) Run App
 
 ```bash
-pnpm tauri dev
+pnpm exec tauri dev
 ```
 
-## 4) Run Deterministic Verification
+## 4) Run Contributor Verification
 
 ```bash
 bash .codex/scripts/run_verify_commands.sh
 ```
+
+Follow the working-directory/branch and safety requirements in [common tasks](common-tasks.md) before running the broader contributor lane.
 
 ## 5) Common Commands
 

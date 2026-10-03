@@ -37,9 +37,9 @@ The repo is active product work. Existing local changes are PR-template metadata
 
 ## How To Run
 
-- Install dependencies with `pnpm install`.
-- Start local development with `pnpm dev`.
-- Build the desktop app with `pnpm build`.
+- Follow [environment setup](docs/onboarding/environment-setup.md) and [verification tasks](docs/onboarding/common-tasks.md).
+- `pnpm dev` and `pnpm build` are browser-preview/frontend commands.
+- Use `pnpm exec tauri dev` / `pnpm exec tauri build` for the native desktop app.
 - Run source-specific and map/replay checks before calling live-data behavior healthy.
 
 ## Known Risks
