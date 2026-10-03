@@ -12,8 +12,8 @@ Required tools:
 - Git
 
 The locked contributor tooling requires this Node range (`lint-staged` 17.5.1
-needs >=22.22.1; jsdom 29.1.1 excludes Node 23). Current CI still selects Node 20;
-that provider/toolchain mismatch is unresolved and is not a supported full
+needs >=22.22.1; jsdom 29.1.1 excludes Node 23). Current CI and `.nvmrc` still select Node 20;
+that toolchain mismatch is unresolved and is not a supported full
 contributor setup. The preflight minimum is not a substitute for these engines.
 
 ## Install sequence
@@ -31,7 +31,7 @@ If `pnpm preflight` fails:
 
 ## Optional configuration
 
-Set `EARTHPULSE_NASA_API_KEY` or `NASA_API_KEY` only if NASA demo-key limits affect local smoke testing. It is not required for first launch.
+Set `EARTHPULSE_NASA_API_KEY` or `NASA_API_KEY` in the native process environment only if NASA demo-key limits affect local smoke testing. The Rust backend does not load `.env` files. A key is not required for first launch.
 
 ## Local run modes
 

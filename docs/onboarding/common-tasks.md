@@ -25,8 +25,9 @@ Manual `pnpm dev` checks should use a fresh browser profile and synthetic inputs
 bash .codex/scripts/run_verify_commands.sh
 ```
 
-Run from the repository root on a non-`main` branch matching
-`codex/<type>/<slug>`, after the [pinned environment setup](environment-setup.md).
+Run from the repository root on a development branch matching
+`<type>/<slug>`, `codex/<type>/<slug>`, or `cc/<task-slug>` / `codex/<task-slug>`
+(task slugs must contain a hyphen), after the [pinned environment setup](environment-setup.md).
 The runner also checks repository Git guards and performance artifacts; it is a
 broader contributor lane, not the first fixture smoke or a desktop-health claim.
 Do not use `dev:lean` or `clean:*` as verification: those wrappers remove local

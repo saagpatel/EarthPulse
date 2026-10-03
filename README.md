@@ -4,16 +4,16 @@
 
 > Leave it open on a second screen and the world starts moving — earthquakes, satellites, aurora, wildfires, and asteroid flybys, all in one place.
 
-EarthPulse turns your desktop into a live globe of planetary activity. It aggregates 12 data streams — USGS earthquakes, ISS and satellite tracks, NOAA space weather, NASA wildfire/storm alerts, asteroid close approaches, and more — and presents them as a layered, explorable map you can scrub through time, filter by event type, or export to CSV and GeoJSON.
+EarthPulse turns your desktop into a live map of planetary activity. It aggregates data streams — USGS earthquakes, ISS and satellite tracks, NOAA space weather, NASA wildfire/storm alerts, asteroid close approaches, and more — and presents them in a layered map and sidebar panels. You can scrub seismic activity through time, toggle map layers, or export earthquake data to CSV and GeoJSON.
 
 ## Features
 
-- **12 Live Data Layers** — Earthquakes (circles + heatmap), ISS tracker, satellite orbital tracks, aurora Kp index, volcanoes, GDACS hazard alerts, NASA wildfires and storms, asteroid close approaches, solar flares and CMEs, tectonic boundaries, meteor showers
+- **Map Layers and Data Panels** — Earthquakes (circles + heatmap), ISS tracker, satellite orbital tracks, aurora Kp index, volcanoes, GDACS hazard alerts, NASA wildfires and storms, asteroid close approaches, solar flares and CMEs, bundled tectonic boundaries and meteor shower schedules
 - **24h Replay** — Scrub through the last 24 hours of seismic activity and watch events pulse across the globe in sequence
 - **Historical Explorer** — Query USGS historical windows to compare past activity patterns against the present
-- **Custom Watchlists** — Save locations you care about and receive proximity-based alerts when events occur nearby
+- **Custom Watchlists** — Save locations you care about and receive proximity-based alerts when earthquakes occur nearby
 - **Stats Dashboard** — Magnitude distributions, frequency trends, and Kp history in compact inline charts
-- **Export** — CSV, GeoJSON, and screenshot export for any current map view
+- **Export** — CSV and GeoJSON export of the live earthquake dataset, and screenshot export of the current map view
 
 ## Data Sources
 
@@ -21,9 +21,9 @@ EarthPulse turns your desktop into a live globe of planetary activity. It aggreg
 |-------|--------|---------|
 | Earthquakes | USGS GeoJSON | 60s |
 | ISS tracker | Open Notify | 5s |
-| Satellite tracks | CelesTrak TLE + SGP4 | 5min |
+| Satellite tracks | CelesTrak TLE + SGP4 | 5min positions; 6h TLE cache |
 | Aurora / Kp index | NOAA SWPC | 15min |
-| Volcanoes | Smithsonian GVP | 6h |
+| Volcanoes | Smithsonian GVP (curated fallback if empty/unavailable) | 6h |
 | GDACS hazard alerts | GDACS RSS | 15min |
 | Wildfires + storms | NASA EONET v3 | 30min |
 | Asteroid close approaches | NASA NEO API | 6h |
@@ -66,14 +66,14 @@ or native desktop behavior.
 |-------|------------|
 | Desktop shell | Tauri 2 + Rust |
 | Frontend | React 19 + TypeScript + Vite |
-| Map rendering | Leaflet / MapLibre |
+| Map rendering | Leaflet |
 | Satellite math | SGP4 propagator (Rust) |
 | Storage | SQLite (watchlists, history) |
 | Styling | Tailwind CSS |
 
 ## Architecture
 
-EarthPulse is a Tauri 2 desktop app. The Rust backend manages all data fetching (polling each source on its configured interval), SGP4 satellite orbit propagation, SQLite persistence for watchlists and replay data, and the historical query engine. The React frontend renders the layered map, handles timeline scrubbing for the 24h replay, and drives the stats dashboard with data streamed from the Rust layer via Tauri commands.
+EarthPulse is a Tauri 2 desktop app. The Rust backend manages feed fetching (background polling for live feeds, on-demand weather, air quality and sea surface temperature queries, and bundled plate and meteor data), SGP4 satellite orbit propagation, SQLite persistence for watchlists and replay data, and the historical query engine. The React frontend renders the layered map, handles timeline scrubbing for the 24h replay, and drives the stats dashboard with data from Rust via Tauri commands and update events. Map tiles load in the frontend.
 
 ## License
 

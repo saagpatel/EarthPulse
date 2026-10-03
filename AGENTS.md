@@ -22,7 +22,7 @@ EarthPulse is a Tauri desktop app that turns live planetary activity into a laye
 
 ## Current State
 
-The repo is active product work. Existing local changes are PR-template metadata, so context recovery should stay documentation-only.
+The repo is active product work.
 
 ## Stack
 
@@ -30,7 +30,7 @@ The repo is active product work. Existing local changes are PR-template metadata
 | -------------- | ---------------------------- |
 | Desktop shell  | Tauri 2 + Rust               |
 | Frontend       | React 19 + TypeScript + Vite |
-| Map rendering  | Leaflet / MapLibre           |
+| Map rendering  | Leaflet                     |
 | Satellite math | SGP4 propagator (Rust)       |
 | Storage        | SQLite (watchlists, history) |
 | Styling        | Tailwind CSS                 |
@@ -51,6 +51,6 @@ The repo is active product work. Existing local changes are PR-template metadata
 
 ## Next Recommended Move
 
-Resolve the PR-template drift separately, then verify feed polling, map layers, replay, watchlists, and export paths before changing runtime behavior.
+Verify feed polling, map layers, replay, watchlists, and export paths before changing runtime behavior.
 
 <!-- portfolio-context:end -->
