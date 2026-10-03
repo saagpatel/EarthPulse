@@ -33,30 +33,32 @@ EarthPulse turns your desktop into a live globe of planetary activity. It aggreg
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 9+
-- Rust toolchain (stable) + Tauri v2 prerequisites for macOS
+- Node.js 22.22.1+ within 22.x, or 24+
+- pnpm 10.30.3 (the `packageManager` pin)
+- Rust 1.96.0 (selected by `rust-toolchain.toml`) + Tauri v2 prerequisites for macOS
 
 ### Installation
 
 ```bash
 git clone https://github.com/saagpatel/EarthPulse.git
 cd EarthPulse
-pnpm install
+corepack pnpm install --frozen-lockfile
 cp .env.example .env
 ```
 
-### Run (development)
+### Run and build
 
 ```bash
-pnpm dev
+pnpm dev                  # browser preview with mocked Tauri data
+pnpm build                # TypeScript + Vite frontend build
+pnpm exec tauri dev        # native desktop app; uses live feeds/local SQLite
+pnpm exec tauri build      # native desktop bundle
 ```
 
-### Build (desktop app)
-
-```bash
-pnpm build
-```
+See [environment setup](docs/onboarding/environment-setup.md) for prerequisites
+and [verification tasks](docs/onboarding/common-tasks.md) for focused tests,
+full checks and conditional browser smoke. Browser mocks do not prove live-feed
+or native desktop behavior.
 
 ## Tech Stack
 
