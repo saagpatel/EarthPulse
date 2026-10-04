@@ -109,8 +109,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.3(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
       '@vitest/coverage-v8':
-        specifier: ^3.2.6
-        version: 3.2.6(vitest@5.0.3)
+        specifier: ^5.0.3
+        version: 5.0.3(vitest@5.0.3)
       commitizen:
         specifier: ^4.3.2
         version: 4.3.2(@types/node@26.6.3)(typescript@6.0.3)
@@ -152,7 +152,7 @@ importers:
         version: 7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0)
       vitest:
         specifier: ^5.0.3
-        version: 5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@3.2.6)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
+        version: 5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
 
 packages:
 
@@ -1229,8 +1229,11 @@ packages:
     peerDependencies:
       vite: 7.3.5
 
-  '@vitest/coverage-v8@3.2.6':
-    resolution: {integrity: sha512-LsAdmUapA0qSN306d8+zOyawM0hFm2m2Hg9IwVNIKBm+qJV8cijiq2c+gxKZcB1HCfIWAy+0qEZDCUQA58A1cw==}
+  "@vitest/coverage-v8@5.0.3":
+    resolution: {integrity: sha512-+klsyz7BvT1vCU28Zkfzms1Ia78XD0V41U3FUtRaa3S+vOr/EXvK1O6BvVD7l1RzEjm6SONR2aybOvDDf9u0mQ==}
+    peerDependencies: {"vitest":"5.0.3","@vitest/browser":"5.0.3"}
+    peerDependenciesMeta: {"@vitest/browser":{"optional":true}}
+
     peerDependencies:
       '@vitest/browser': 3.2.6
       vitest: 3.2.6
@@ -3616,6 +3619,24 @@ packages:
       use-sync-external-store:
         optional: true
 
+  "magicast@0.5.4":
+    resolution: {integrity: sha512-llBEhWm1SacoRwgHUoQJYtwp4PBLF4faQi5TCpIGyGs9n4y5+juI0tDgyKIfpqxckRHaHzouUEph3THklWh03w==}
+
+  "tinyrainbow@3.1.1":
+    resolution: {integrity: sha512-yau8yJdTt989Mm0Bd/236QnzEiPf2xLLTqUZRUJOo/3CB078LSwzei343DgtJVmfJKJE3TMINY1u42SQsP6mXw==}
+    engines: {"node":">=14.0.0"}
+
+  "ast-v8-to-istanbul@1.0.5":
+    resolution: {integrity: sha512-UPAgKJFSEGMWSDr3LX4tqnAb4f7KGT8O40Tyx8wbYmmZ/yn58lNCm8h3svs3eXgiGd5AXxz8NDOvXWvicq+rJA==}
+
+  "@vitest/istanbul-lib-report@1.0.0":
+    resolution: {integrity: sha512-NYqaFIc2vKd069hB+oRPf2ckkEq/lYg1W+12l4t0M0c3LYrGgMz8Sj7v+fgONanDsZMBqxQySQkChcwN/ajUBw==}
+    engines: {"node":">=22"}
+
+  "@vitest/istanbul-lib-coverage@1.0.0":
+    resolution: {integrity: sha512-BScRXlnT3d8tN39mDZuZgS6OmczgyLNO55FGka+CO0LO5458m7hBnEvDm/Dc12f07R4ChdDst66YfKtCr2T8mg==}
+    engines: {"node":">=22"}
+
 snapshots:
 
   '@adobe/css-tools@4.5.0': {}
@@ -4469,7 +4490,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
     optionalDependencies:
-      vitest: 5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@3.2.6)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
+      vitest: 5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
 
   '@testing-library/react@16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -4651,7 +4672,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@3.2.6(vitest@5.0.3)':
+  "@vitest/coverage-v8@5.0.3(vitest@5.0.3)":
+    dependencies:
+      "obug": "2.2.1"
+      "std-env": "4.3.0"
+      "magicast": "0.5.4"
+      "tinyrainbow": "3.1.1"
+      "@bcoe/v8-coverage": "1.0.2"
+      "ast-v8-to-istanbul": "1.0.5"
+      "@vitest/istanbul-lib-report": "1.0.0"
+      "@vitest/istanbul-lib-coverage": "1.0.0"
+      "vitest": "5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))"
+
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -4666,7 +4698,7 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.2
       tinyrainbow: 2.0.0
-      vitest: 5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@3.2.6)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
+      vitest: 5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -6880,7 +6912,7 @@ snapshots:
       lightningcss: 1.32.0
       yaml: 2.9.0
 
-  vitest@5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@3.2.6)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0)):
+  vitest@5.0.3(@types/node@26.6.3)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.1)(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.3(vite@7.3.5(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
@@ -6898,7 +6930,7 @@ snapshots:
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 26.6.3
-      '@vitest/coverage-v8': 3.2.6(vitest@5.0.3)
+      '@vitest/coverage-v8': 5.0.3(vitest@5.0.3)
       jsdom: 30.1.1
     transitivePeerDependencies:
       - msw
@@ -7074,3 +7106,22 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.13
       react: 19.2.4
+  "magicast@0.5.4":
+    dependencies:
+      "@babel/types": "7.29.7"
+      "@babel/parser": "7.29.7"
+      "source-map-js": "1.2.1"
+
+  "tinyrainbow@3.1.1": {}
+
+  "ast-v8-to-istanbul@1.0.5":
+    dependencies:
+      "js-tokens": "10.0.0"
+      "estree-walker": "3.0.3"
+      "@jridgewell/trace-mapping": "0.3.31"
+
+  "@vitest/istanbul-lib-report@1.0.0":
+    dependencies:
+      "@vitest/istanbul-lib-coverage": "1.0.0"
+
+  "@vitest/istanbul-lib-coverage@1.0.0": {}
