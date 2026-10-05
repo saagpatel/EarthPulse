@@ -4,7 +4,7 @@
       "numberOfRuns": 3,
       "url": ["http://localhost:4173/"],
       "startServerCommand": "pnpm exec vite preview --host 127.0.0.1 --port 4173 --strictPort",
-      "startServerReadyPattern": "http://127\\.0\\.0\\.1:4173/",
+      "startServerReadyPattern": "Local(?:\\u001b\\[[0-9;]*m)*:",
       "startServerReadyTimeout": 30000
     },
     "assert": {
