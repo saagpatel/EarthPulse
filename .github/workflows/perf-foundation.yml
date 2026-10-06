@@ -94,7 +94,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2
+      - uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
       - run: k6 run tests/perf/api.k6.js --summary-export=.perf-results/api-summary.json
         env:
           BASE_URL: ${{ vars.PERF_BASE_URL }}
