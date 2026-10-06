@@ -1,5 +1,8 @@
 name: git-hygiene
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
@@ -8,47 +11,47 @@ on:
 jobs:
   commitlint:
     if: ${{ github.actor != 'dependabot[bot]' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed
+      - uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
 
   pr-title:
     if: ${{ github.actor != 'dependabot[bot]' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   branch-name:
     if: ${{ github.actor != 'dependabot[bot]' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
-      pull-requests: read
+      contents: read
     steps:
       # Runs the repository's own guard rather than restating its rule. This job
       # carried a second copy of the branch pattern and the two had drifted: the
       # guard accepts <type>/<slug> and <agent>/<task-slug>, this copy accepted
       # neither, so a branch the local hook blessed failed here. One rule, one
       # place, pinned by the guard's own test suite.
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: bash scripts/git/guard-branch.sh
 
   secrets:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

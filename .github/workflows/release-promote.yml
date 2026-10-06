@@ -1,5 +1,8 @@
 name: release-promote
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -14,12 +17,12 @@ on:
 
 jobs:
   promote:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       actions: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -62,7 +65,7 @@ jobs:
 
       - name: Trigger stable release workflow dispatch (fallback)
         id: dispatch
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           STABLE_TAG: ${{ inputs.stable_tag }}
         with:
@@ -102,7 +105,9 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## RC Promotion Complete" >> "$GITHUB_STEP_SUMMARY"
-          echo "- RC tag: \`${{ inputs.rc_tag }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Stable tag: \`${{ inputs.stable_tag }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Stable dispatch fallback: \`${{ steps.dispatch.outputs.result }}\`" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## RC Promotion Complete"
+            echo "- RC tag: \`${{ inputs.rc_tag }}\`"
+            echo "- Stable tag: \`${{ inputs.stable_tag }}\`"
+            echo "- Stable dispatch fallback: \`${{ steps.dispatch.outputs.result }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
