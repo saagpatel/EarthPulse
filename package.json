@@ -89,7 +89,7 @@
     "@lhci/cli": "^0.15.1",
     "commitizen": "^4.3.2",
     "husky": "^9.1.7",
-    "lint-staged": "^17.5.1",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.9",
     "jsdom": "^30.1.1",
     "vitest": "^5.0.3"
